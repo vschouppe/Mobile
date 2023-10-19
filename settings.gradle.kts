@@ -13,5 +13,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "ComposeTutorial"
+rootProject.name = "MobileAppsPlayground"
 include(":app")
