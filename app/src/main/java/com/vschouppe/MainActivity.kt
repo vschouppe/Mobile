@@ -4,6 +4,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.annotation.VisibleForTesting
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -33,6 +34,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
@@ -40,7 +42,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.example.tiptime.ui.theme.TipTimeTheme
+import com.vschouppe.ui.theme.TipTimeTheme
 import java.lang.Math.ceil
 import java.text.NumberFormat
 
@@ -132,6 +134,7 @@ fun RoundUp(
             modifier = Modifier
                 .fillMaxWidth()
                 .wrapContentWidth(Alignment.End)
+                .testTag("Switch")
                 )
     }
 }
@@ -217,7 +220,8 @@ fun TipPercentagePreview(){
  * according to the local currency.
  * Example would be "$10.00".
  */
-private fun calculateTip(amount: Double, tipPercent: Double = 15.0, roundUp: Boolean): String {
+@VisibleForTesting
+internal fun calculateTip(amount: Double, tipPercent: Double = 15.0, roundUp: Boolean): String {
     val tip = if (roundUp) ceil(tipPercent / 100 * amount) else tipPercent / 100 * amount
     return NumberFormat.getCurrencyInstance().format(tip)
 }
