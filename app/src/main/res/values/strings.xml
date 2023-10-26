@@ -17,6 +17,8 @@
 <resources>
     <string name="app_name">Tip Time</string>
     <string name="calculate_tip">Calculate Tip</string>
-    <string name="tip_amount">Tip Amount in AU$: %s</string>
+    <string name="tip_amount">Tip Amount: %s</string>
     <string name="input_label_bill_amount">Bill amount</string>
+    <string name="intput_label_tip_percentage">Tip</string>
+    <string name="input_label_round_up">Round up tip?</string>
 </resources>
