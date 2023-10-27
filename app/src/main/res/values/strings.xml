@@ -1,3 +1,16 @@
 <resources>
-    <string name="app_name">MobileAppsPlayground</string>
+    <string name="app_name">Art app</string>
+    <string name="app_name_title">Feel good</string>
+    <string name="button_previous">Previous</string>
+    <string name="button_next">Next</string>
+<!--    Zoe's pictures-->
+    <string name="title_Zoe1">Catch</string>
+    <string name="title_Zoe2">Ready?</string>
+    <string name="title_Zoe3">Come here</string>
+    <string name="artist_Zoe1">Vincent</string>
+    <string name="artist_Zoe2">Aimee</string>
+    <string name="artist_Zoe3">Park Ranger</string>
+    
+
+
 </resources>
