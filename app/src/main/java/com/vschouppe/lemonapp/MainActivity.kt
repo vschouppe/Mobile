@@ -55,8 +55,6 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun getMeSomeLemonade(){
     var lemonPhase by remember{ mutableStateOf(1) }
-    var buttonText = R.string.tap_lemon_tree
-    var image = R.drawable.lemon_tree
     Column (
         modifier = Modifier
             .fillMaxWidth()
@@ -106,8 +104,7 @@ fun getMeSomeLemonade(){
 fun lemonImageAndText(
     resource : Int,
     text : Int,
-    onImageClick: () ->  Unit,
-    modifier: Modifier = Modifier
+    onImageClick: () ->  Unit
 ){
     Column (
         verticalArrangement = Arrangement.Center,

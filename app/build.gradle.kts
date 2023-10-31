@@ -8,7 +8,7 @@ android {
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.vschouppe"
+        applicationId = "com.vschouppe.Lemonade"
         minSdk = 24
         targetSdk = 33
         versionCode = 1
