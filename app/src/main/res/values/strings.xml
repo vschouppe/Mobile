@@ -1,3 +1,18 @@
 <resources>
-    <string name="app_name">MobileAppsPlayground</string>
+    <string name="app_name">Five Van Build Tips</string>
+<!--    Van tips-->
+    <string name="vantip_card_title">Tip </string>
+    <string name="vantip_clean">Clean your van</string>
+    <string name="vantip_de_rust">De-rust your van</string>
+    <string name="vantip_design">Design</string>
+    <string name="vantip_repair">Repair your van</string>
+    <string name="vantip_window">Cut your windows</string>
+<!--    Van tip information-->
+    <string name="vantip_info_clean">Before doing anything on the build of your van everything needs to be nice an clean.</string>
+    <string name="vantip_info_de_rust">Rust is your enemy. Treat all the rust and you will thank me later.</string>
+    <string name="vantip_info_design">Design your van, your electricals, ... Plan things out. Use cardboard boxes.</string>
+    <string name="vantip_info_repair">Repair your van where needed. If your wife wants to fix the tailgate that\'s a good idea.</string>
+    <string name="vantip_info_window">Cut your windows. They need to be done before doing any insulation or what not.</string>
+
+
 </resources>
