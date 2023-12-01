@@ -2,29 +2,31 @@ package com.vschouppe
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
-import androidx.compose.material3.CardColors
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.vschouppe.model.VanTip
@@ -42,7 +44,9 @@ fun VanTipsList(
         itemsIndexed(tips){index, tip ->
             VanTipItem(
                 index = index,
-                tip = tip
+                tip = tip,
+                modifier = Modifier
+                    .widthIn(200.dp)
             )
         }
     }
@@ -59,14 +63,19 @@ fun VanTipsListPreview(
 @Composable
 fun VanTipItem(
     index: Int,
-    tip: VanTip
+    tip: VanTip,
+    modifier: Modifier= Modifier
 ) {
+    var infoState by remember {
+        mutableStateOf(false)
+    }
     Card(elevation = CardDefaults.cardElevation(defaultElevation = 20.dp),
         modifier = Modifier
             .padding(24.dp)
+            .fillMaxWidth()
     ) {
         Column(
-            verticalArrangement = Arrangement.Top,
+            verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier
                 .background(MaterialTheme.colorScheme.primaryContainer)
@@ -81,23 +90,29 @@ fun VanTipItem(
                 painter = painterResource(id = tip.image),
                 contentDescription = null,
                 alignment = Alignment.Center,
-                contentScale = ContentScale.FillWidth
-            )
-            Column(verticalArrangement = Arrangement.Top,
-                horizontalAlignment = Alignment.CenterHorizontally,
+                contentScale = ContentScale.FillWidth,
                 modifier = Modifier
-                    .padding(10.dp)){
-                Text(
-                    text = stringResource(id = tip.name),
-                    style = MaterialTheme.typography.displaySmall,
-                    modifier = Modifier.padding(6.dp)
-                )
-                Spacer(modifier = Modifier.height(6.dp))
-                Text(
-                    text = stringResource(id = tip.description),
-                    style = MaterialTheme.typography.bodyLarge,
-                    modifier = Modifier.padding(6.dp)
-                )
+                    .clickable(true){
+                        if (infoState==true) infoState=false else infoState=true
+                    }
+            )
+            if (infoState){
+                Column(verticalArrangement = Arrangement.Top,
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier
+                        .padding(10.dp)){
+                    Text(
+                        text = stringResource(id = tip.name),
+                        style = MaterialTheme.typography.displaySmall,
+                        modifier = Modifier.padding(6.dp)
+                    )
+                    Spacer(modifier = Modifier.height(6.dp))
+                    Text(
+                        text = stringResource(id = tip.description),
+                        style = MaterialTheme.typography.bodyLarge,
+                        modifier = Modifier.padding(6.dp)
+                    )
+                }
             }
         }
     }
