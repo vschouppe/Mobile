@@ -10,7 +10,9 @@
     <string name="artist_Zoe1">Vincent</string>
     <string name="artist_Zoe2">Aimee</string>
     <string name="artist_Zoe3">Park Ranger</string>
-    
+
+    <string name="api_result_start">API result text will appear here</string>
+
 
 
 </resources>

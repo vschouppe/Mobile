@@ -34,10 +34,13 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.vschouppe.R
 import com.vschouppe.artapp.data.ArtInfo
 import com.vschouppe.artapp.data.myArtCollection
 import com.vschouppe.artapp.theme.MobileAppsPlaygroundTheme
+import com.vschouppe.artapp.screens.ApiScreen
+import com.vschouppe.artapp.screens.ArtViewModel
 
 class ArtApp : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -102,6 +105,17 @@ fun ArtWindow(modifier: Modifier = Modifier) {
             ButtonsScreen(
                 {if(pictureNumber > 0) pictureNumber-- else pictureNumber= myArtCollection.size-1},
                 {if(pictureNumber < myArtCollection.size-1) pictureNumber++ else pictureNumber=0})
+        }
+        Spacer(modifier = Modifier.height(20.dp))
+        Row (horizontalArrangement = Arrangement.Center,
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier
+                .fillMaxWidth()
+                .fillMaxHeight(0.2f))
+        {
+            Log.d("API result", "API result screen")
+            val artViewModel : ArtViewModel = viewModel()
+            ApiScreen(artUiState = artViewModel.artUiState)
         }
     }
 }
