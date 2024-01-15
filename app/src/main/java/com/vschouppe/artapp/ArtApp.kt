@@ -1,4 +1,4 @@
-package com.vschouppe
+package com.vschouppe.artapp
 
 import android.os.Bundle
 import android.util.Log
@@ -34,9 +34,10 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.vschouppe.data.ArtInfo
-import com.vschouppe.data.myArtCollection
-import com.vschouppe.ui.theme.MobileAppsPlaygroundTheme
+import com.vschouppe.R
+import com.vschouppe.artapp.data.ArtInfo
+import com.vschouppe.artapp.data.myArtCollection
+import com.vschouppe.artapp.theme.MobileAppsPlaygroundTheme
 
 class ArtApp : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -183,5 +184,5 @@ fun ButtonsScreenPreview() {
     var pictureNumber = 1
     ButtonsScreen(
         {if(pictureNumber==0) myArtCollection.size-1 else pictureNumber--},
-        {if(pictureNumber==myArtCollection.size-1) pictureNumber=0 else pictureNumber++})
+        {if(pictureNumber== myArtCollection.size-1) pictureNumber=0 else pictureNumber++})
 }

@@ -1,4 +1,4 @@
-package com.vschouppe.ui.theme
+package com.vschouppe.artapp.theme
 
 import androidx.compose.ui.graphics.Color
 

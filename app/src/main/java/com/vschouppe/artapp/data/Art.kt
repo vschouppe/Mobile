@@ -1,8 +1,6 @@
-package com.vschouppe.data
+package com.vschouppe.artapp.data
 
-import android.icu.text.CaseMap.Title
 import androidx.annotation.DrawableRes
-import androidx.annotation.StringRes
 import com.vschouppe.R
 
 val myArtCollection = listOf(
