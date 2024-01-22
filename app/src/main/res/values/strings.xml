@@ -10,7 +10,17 @@
     <string name="artist_Zoe1">Vincent</string>
     <string name="artist_Zoe2">Aimee</string>
     <string name="artist_Zoe3">Park Ranger</string>
-    
+
+
+    <string name="api_result_start">API result text will appear here</string>
+<!--    <string name="firebase_web_client_id">535228258764-3uohqsrge8flfvrnde738idok90uqrrf.apps.googleusercontent.com</string>-->
+    <string name="firebase_web_client_id">800452882287-hig8b33bjg1fnvj8h2lei94m5cvio84t.apps.googleusercontent.com</string>
+
+    //Google sign in
+    <string name="google_sign_in">Log into Google</string>
+    <string name="google_signed_in">You are logged into Google</string>
+    <string name="google_signed_in_failed">Your google sign in failed</string>
+
 
 
 </resources>
