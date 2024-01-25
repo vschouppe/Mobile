@@ -11,7 +11,7 @@ import com.google.android.gms.auth.api.identity.SignInClient
 import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
-import com.vschouppe.R
+import com.vschouppe.artapp.R
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.tasks.await
 
@@ -28,6 +28,11 @@ class GoogleAuthUiClient(
                 buildSignInRequest()
             ).await()
         } catch(e: Exception) {
+            Toast.makeText(
+                context,
+                "Error: ${e.printStackTrace()}" ,
+                Toast.LENGTH_LONG
+            ).show()
             e.printStackTrace()
             if(e is CancellationException) throw e
             null

@@ -11,10 +11,14 @@
     <string name="artist_Zoe2">Aimee</string>
     <string name="artist_Zoe3">Park Ranger</string>
 
+<!--    Screen titles-->
+    <string name="screen_zoe">Zoe App</string>
+    <string name="screen_profile_back">Back 2 Profile</string>
+
 
     <string name="api_result_start">API result text will appear here</string>
 <!--    <string name="firebase_web_client_id">535228258764-3uohqsrge8flfvrnde738idok90uqrrf.apps.googleusercontent.com</string>-->
-    <string name="firebase_web_client_id">800452882287-hig8b33bjg1fnvj8h2lei94m5cvio84t.apps.googleusercontent.com</string>
+    <string name="firebase_web_client_id">74689574541-265l94nfid07vp6t116bt34it3gt1ean.apps.googleusercontent.com</string>
 
     //Google sign in
     <string name="google_sign_in">Log into Google</string>

@@ -1,33 +1,78 @@
 {
   "project_info": {
-    "project_number": "800452882287",
-    "project_id": "artapp-f10ed",
-    "storage_bucket": "artapp-f10ed.appspot.com"
+    "project_number": "74689574541",
+    "project_id": "zoeapp-b1b88",
+    "storage_bucket": "zoeapp-b1b88.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:800452882287:android:e30d625b97840aaea2429a",
+        "mobilesdk_app_id": "1:74689574541:android:37d13f6ae29b2d5af9d4c4",
         "android_client_info": {
-          "package_name": "com.vschouppe.artapp"
+          "package_name": "com.plcoding.composegooglesignincleanarchitecture"
         }
       },
       "oauth_client": [
         {
-          "client_id": "800452882287-hig8b33bjg1fnvj8h2lei94m5cvio84t.apps.googleusercontent.com",
+          "client_id": "74689574541-igk9ihsdpepcf37mr4u6qtodjehkipa3.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.plcoding.composegooglesignincleanarchitecture",
+            "certificate_hash": "ef9a86f78a4f2c27d203db0d364a078064bfdf07"
+          }
+        },
+        {
+          "client_id": "74689574541-265l94nfid07vp6t116bt34it3gt1ean.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyBjDWUf6uj0ffn3urg9rSGlvrikhzU7LEc"
+          "current_key": "AIzaSyD7z9Q2cFmR-X7_arx_ZaF6djklaenfLLs"
         }
       ],
       "services": {
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "800452882287-hig8b33bjg1fnvj8h2lei94m5cvio84t.apps.googleusercontent.com",
+              "client_id": "74689574541-265l94nfid07vp6t116bt34it3gt1ean.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:74689574541:android:7c2a4aa07ef8f6dbf9d4c4",
+        "android_client_info": {
+          "package_name": "com.vschouppe.artapp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "74689574541-oqhu4nanq5nukjafn51vk41lfpik9uau.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.vschouppe.artapp",
+            "certificate_hash": "ef9a86f78a4f2c27d203db0d364a078064bfdf07"
+          }
+        },
+        {
+          "client_id": "74689574541-265l94nfid07vp6t116bt34it3gt1ean.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD7z9Q2cFmR-X7_arx_ZaF6djklaenfLLs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "74689574541-265l94nfid07vp6t116bt34it3gt1ean.apps.googleusercontent.com",
               "client_type": 3
             }
           ]

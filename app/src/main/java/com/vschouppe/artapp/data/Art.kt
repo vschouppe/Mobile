@@ -1,7 +1,7 @@
 package com.vschouppe.artapp.data
 
 import androidx.annotation.DrawableRes
-import com.vschouppe.R
+import com.vschouppe.artapp.R
 
 val myArtCollection = listOf(
     R.drawable.zoe1 to ArtInfo(R.string.title_Zoe1,R.string.artist_Zoe1),
