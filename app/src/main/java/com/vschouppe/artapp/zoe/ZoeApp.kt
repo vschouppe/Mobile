@@ -65,7 +65,7 @@ fun ArtWindow(navigation: () -> Unit,
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier
                 .fillMaxWidth()
-                .fillMaxHeight(0.3f))
+                .fillMaxHeight(0.2f))
         {
             ArtInfoScreen(myArtCollection.get(pictureNumber).artInfo)
         }
@@ -74,7 +74,7 @@ fun ArtWindow(navigation: () -> Unit,
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier
                 .fillMaxWidth()
-                .fillMaxHeight(0.1f))
+                .fillMaxHeight(0.2f))
         {
             Log.d("Button row", "value of pictureNumber $pictureNumber")
             Log.d("Button row", "value of myArtCollection.size $myArtCollection.size")
@@ -82,11 +82,12 @@ fun ArtWindow(navigation: () -> Unit,
                 {if(pictureNumber > 0) pictureNumber-- else pictureNumber= myArtCollection.size-1},
                 {if(pictureNumber < myArtCollection.size-1) pictureNumber++ else pictureNumber=0})
         }
+        Spacer(modifier = Modifier.height(20.dp))
         Row (horizontalArrangement = Arrangement.Center,
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier
                 .fillMaxWidth()
-                .fillMaxHeight(0.1f)){
+                .fillMaxHeight(0.25f)){
             Button(
                 onClick = navigation,
                 shape = MaterialTheme.shapes.medium

@@ -125,8 +125,7 @@ class ArtApp : ComponentActivity() {
                                             "Signed out",
                                             Toast.LENGTH_LONG
                                         ).show()
-
-                                        navController.popBackStack()
+                                        navController.navigate("sign_in")
                                     }
                                 },
                                 navToZoe = {
