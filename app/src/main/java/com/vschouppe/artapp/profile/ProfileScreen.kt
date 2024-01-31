@@ -24,7 +24,8 @@ import com.vschouppe.artapp.signin.UserData
 fun ProfileScreen(
     userData: UserData?,
     onSignOut: () -> Unit,
-    navToZoe: () -> Unit
+    navToZoe: () -> Unit,
+    loadAlbums: () -> Unit
 ) {
     Column(
         modifier = Modifier.fillMaxSize(),
@@ -56,6 +57,9 @@ fun ProfileScreen(
         }
         Button(onClick = navToZoe) {
             Text(text = stringResource(id = R.string.screen_zoe))
+        }
+        Button(onClick = loadAlbums) {
+            Text(text = stringResource(id = R.string.action_load_albums))
         }
     }
 }

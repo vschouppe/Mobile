@@ -21,6 +21,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.google.android.gms.auth.api.identity.Identity
+import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.vschouppe.artapp.profile.ProfileScreen
 import com.vschouppe.artapp.signin.GoogleAuthUiClient
 import com.vschouppe.artapp.signin.SignInScreen
@@ -28,6 +29,7 @@ import com.vschouppe.artapp.signin.SignInViewModel
 import com.vschouppe.artapp.theme.MobileAppsPlaygroundTheme
 import com.vschouppe.artapp.zoe.ArtWindow
 import kotlinx.coroutines.launch
+
 
 class ArtApp : ComponentActivity() {
     private val googleAuthUiClient by lazy {
@@ -38,6 +40,12 @@ class ArtApp : ComponentActivity() {
     }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        Log.d("onCreate","mGoogleSignInClient start")
+        val mGoogleSignInClient = GoogleSignIn.getClient(this, googleAuthUiClient.gso)
+        Log.d("onCreate","mGoogleSignInClient: ${mGoogleSignInClient}")
+        val account = GoogleSignIn.getLastSignedInAccount(this)
+        Log.d("onCreate","account: ${account}")
+
         setContent {
             MobileAppsPlaygroundTheme {
                 // A surface container using the 'background' color from the theme
@@ -74,6 +82,8 @@ class ArtApp : ComponentActivity() {
                                                 intent = result.data ?: return@launch
                                             )
                                             viewModel.onSignInResult(signInResult)
+                                            Log.d("signInResult", " signInResult data ${signInResult.data} and" +
+                                                    "${signInResult.errorMessage} or ${signInResult.toString()}")
                                         }
                                     } else if (result.resultCode == RESULT_CANCELED){
                                         Toast.makeText(
@@ -130,6 +140,25 @@ class ArtApp : ComponentActivity() {
                                 },
                                 navToZoe = {
                                     navController.navigate("art_window")
+                                },
+                                loadAlbums = {
+//                                    load the albums
+//                                    lifecycleScope.launch {
+//                                        Log.d("GoogleAPI","We're loading the google albums")
+//                                        try {
+//                                            val token =  account?.serverAuthCode
+//                                            if (token!=null){
+//                                                Log.d("GoogleAPI","token ${token}")
+//                                                val listResult = GoogleApi.retrofitService.getAlbums("Bearer ${token}")
+//                                                Log.d("GoogleAPI","albums ${listResult}")
+//                                            }
+//                                        } catch (e: IOException) {
+//                                            Log.d("GoogleAPI","IOException ${e}")
+//                                        } catch (e: HttpException) {
+//                                            Log.d("GoogleAPI","HttpException ${e}")
+//                                        }
+//                                        Log.d("GoogleAPI","Done loading the google albums")
+//                                    }
                                 }
                             )
                         }

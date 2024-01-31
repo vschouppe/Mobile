@@ -8,6 +8,11 @@ import android.widget.Toast
 import com.google.android.gms.auth.api.identity.BeginSignInRequest
 import com.google.android.gms.auth.api.identity.BeginSignInRequest.GoogleIdTokenRequestOptions
 import com.google.android.gms.auth.api.identity.SignInClient
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions
+import com.google.android.gms.common.api.Scope
+import com.google.android.gms.tasks.Task
+import com.google.android.gms.tasks.Tasks
+import com.google.firebase.auth.GetTokenResult
 import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
@@ -15,15 +20,24 @@ import com.vschouppe.artapp.R
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.tasks.await
 
+
 class GoogleAuthUiClient(
     private val context: Context,
     private val oneTapClient: SignInClient
 ) {
     private val auth = Firebase.auth
 
+    // Configure sign-in to request the user's ID, email address, and basic
+    // profile. ID and basic profile are included in DEFAULT_SIGN_IN.
+    var gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+        .requestEmail()
+        .requestScopes(Scope("https://www.googleapis.com/auth/photoslibrary.readonly"))
+        .build()
+
     suspend fun signIn(): IntentSender? {
         Log.d("signIn"," start signIn build awaiting result")
         val result = try {
+            Log.d("signIn"," start signIn build awaiting result")
             oneTapClient.beginSignIn(
                 buildSignInRequest()
             ).await()
@@ -37,15 +51,20 @@ class GoogleAuthUiClient(
             if(e is CancellationException) throw e
             null
         }
+
         Log.d("signIn","signIn build complete awaiting result")
         return result?.pendingIntent?.intentSender
     }
+
+
 
     suspend fun signInWithIntent(intent: Intent): SignInResult {
         val credential = oneTapClient.getSignInCredentialFromIntent(intent)
         val googleIdToken = credential.googleIdToken
         val googleCredentials = GoogleAuthProvider.getCredential(googleIdToken, null)
+        Log.d("signInWithIntent","credential ${credential}, googleIdToken: ${googleIdToken}, googleCredentials:${googleCredentials}")
         return try {
+            auth.getAccessToken(true)
             val user = auth.signInWithCredential(googleCredentials).await().user
             SignInResult(
                 data = user?.run {
@@ -85,7 +104,15 @@ class GoogleAuthUiClient(
         )
     }
 
+    // Function to get an access token
+    fun getAccessToken(): Task<GetTokenResult> {
+        // Force refresh to get a new token
+        return auth.currentUser?.getIdToken(true)
+            ?: Tasks.forException(Exception("User not signed in")) // Replace this with appropriate error handling
+    }
+
     private fun buildSignInRequest(): BeginSignInRequest {
+        Log.d("signIn"," start buildSignInRequest build awaiting result")
         return BeginSignInRequest.Builder()
             .setGoogleIdTokenRequestOptions(
                 GoogleIdTokenRequestOptions.builder()
@@ -97,4 +124,5 @@ class GoogleAuthUiClient(
             .setAutoSelectEnabled(true)
             .build()
     }
+
 }
