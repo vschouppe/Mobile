@@ -20,4 +20,18 @@ class SignInViewModel: ViewModel() {
     fun resetState() {
         _state.update { SignInState() }
     }
+
+    fun updateAddress(userAddress: UserAddress){
+        _state.update { it.copy(
+            address = userAddress
+        ) }
+    }
+
+    fun updateWelcomeText(text: String) {
+        _state.update {
+            it.copy(
+                welcomeText = text
+            )
+        }
+    }
 }

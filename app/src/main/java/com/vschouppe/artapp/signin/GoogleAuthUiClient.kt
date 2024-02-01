@@ -5,6 +5,7 @@ import android.content.Intent
 import android.content.IntentSender
 import android.util.Log
 import android.widget.Toast
+import androidx.core.app.ActivityCompat.startActivityForResult
 import com.google.android.gms.auth.api.identity.BeginSignInRequest
 import com.google.android.gms.auth.api.identity.BeginSignInRequest.GoogleIdTokenRequestOptions
 import com.google.android.gms.auth.api.identity.SignInClient
@@ -27,12 +28,6 @@ class GoogleAuthUiClient(
 ) {
     private val auth = Firebase.auth
 
-    // Configure sign-in to request the user's ID, email address, and basic
-    // profile. ID and basic profile are included in DEFAULT_SIGN_IN.
-    var gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-        .requestEmail()
-        .requestScopes(Scope("https://www.googleapis.com/auth/photoslibrary.readonly"))
-        .build()
 
     suspend fun signIn(): IntentSender? {
         Log.d("signIn"," start signIn build awaiting result")
