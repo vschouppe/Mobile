@@ -5,7 +5,7 @@
 <!--    sign in screen-->
     <string name="signin_location">How\'s the weather in</string>
     <string name="signin_location_where_are_you">How\'s the weather in</string>
-    <string name="signin_welcome_initial">How\'s the weather in \n lalaLand</string>
+    <string name="signin_welcome_initial">How\'s the weather in</string>
     <string name="signin_welcome">How\'s the weather in</string>
 
     <string name="button_previous">Previous</string>

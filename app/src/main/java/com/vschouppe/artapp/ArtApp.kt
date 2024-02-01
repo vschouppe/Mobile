@@ -41,6 +41,7 @@ import com.vschouppe.artapp.signin.SignInViewModel
 import com.vschouppe.artapp.signin.UserAddress
 import com.vschouppe.artapp.theme.MobileAppsPlaygroundTheme
 import com.vschouppe.artapp.zoe.ArtWindow
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import retrofit2.HttpException
 import java.io.IOException
@@ -97,16 +98,16 @@ class ArtApp : ComponentActivity() {
                         composable("sign_in") {
                             val viewModel = viewModel<SignInViewModel>()
                             val state by viewModel.state.collectAsStateWithLifecycle()
-                            val welcomeText = R.string.signin_welcome
                             LaunchedEffect(key1 = Unit) {
                                 if (googleAuthUiClient.getSignedInUser() != null) {
                                     navController.navigate("profile")
                                 }
                                 checkLocationPermissions()
-                                var userAddress = getUserAddress()
+                                val userAddress: UserAddress? = getUserAddress()
+                                Log.d("sign_in","${userAddress}")
                                 if (userAddress != null) {
                                     viewModel.updateAddress(userAddress)
-                                    viewModel.updateWelcomeText(welcomeText.toString() + " \n" + userAddress.city)
+                                    Log.d("sign_in","Updated address to viewModel")
                                 }
                             }
 
@@ -135,6 +136,11 @@ class ArtApp : ComponentActivity() {
                                     }
                                 }
                             )
+//                            LaunchedEffect(key1 = state.address) {
+//                                if (state.address != null) {
+//                                    viewModel.updateAddress()
+//                                }
+//                            }
                             LaunchedEffect(key1 = state.isSignInSuccessful) {
                                 if (state.isSignInSuccessful) {
                                     Toast.makeText(
@@ -165,15 +171,17 @@ class ArtApp : ComponentActivity() {
                                     }
                                 },
                                 locationClick = {
-                                    var userAddress = getUserAddress()
-                                    Toast.makeText(
-                                        applicationContext,
-                                        "city: ${userAddress?.city}" + "\n" +
-                                        "countryName: ${userAddress?.countryName}" + "\n" +
-                                        "latitude: ${userAddress?.latitude}" + "\n" +
-                                        "longitude: ${userAddress?.longitude}",
-                                        Toast.LENGTH_LONG
-                                    ).show()
+                                    lifecycleScope.launch {
+                                        var userAddress = getUserAddress()
+                                        Toast.makeText(
+                                            applicationContext,
+                                            "city: ${userAddress?.city}" + "\n" +
+                                                    "countryName: ${userAddress?.countryName}" + "\n" +
+                                                    "latitude: ${userAddress?.latitude}" + "\n" +
+                                                    "longitude: ${userAddress?.longitude}",
+                                            Toast.LENGTH_LONG
+                                        ).show()
+                                    }
                                 }
                             )
                         }
@@ -223,18 +231,18 @@ class ArtApp : ComponentActivity() {
     }
 
     @SuppressLint("MissingPermission")
-    private fun getUserAddress() :  UserAddress?{
-        Log.d("SignInScreen", "locationClick event")
+    private suspend fun getUserAddress() :  UserAddress?{
+        Log.d("getUserAddress", "locationClick event")
 
         var userAddress = UserAddress()
         val client = LocationServices.getFusedLocationProviderClient(applicationContext)
         if (hasLocationPermissions(this)) {
             client.lastLocation
                 .addOnSuccessListener { location: Location? ->
-                    Log.d("SignInScreenLocation", "successlistener ok")
+                    Log.d("getUserAddress", "successlistener ok")
                     if (location != null) {
                         Log.d(
-                            "SignInScreenLocation",
+                            "getUserAddress",
                             "lat ${location.latitude} + long ${location.longitude}"
                         )
                         userAddress = UserAddress(
@@ -242,32 +250,52 @@ class ArtApp : ComponentActivity() {
                             longitude = location.longitude
                         )
                         var addresses = getAddress(location.latitude, location.longitude)
+
                         addresses?.get(0)
                             ?.let { it1 ->
                                 userAddress.city = it1.locality
                                 userAddress.countryName = it1.countryName
+                                Log.d(
+                                    "getUserAddress","userAddress1: ${userAddress}"
+                                )
                             }
+                        Log.d(
+                            "getUserAddress","userAddress2: ${userAddress}"
+                        )
                     }
                 }
                 .addOnFailureListener { exception ->
                     Log.e(
-                        "SignInScreenLocation",
+                        "getUserAddress",
                         "LocationAvailability ${exception}"
                     )
                 }
+
+            Log.d(
+                "getUserAddress","userAddress3: ${userAddress}"
+            )
             client.locationAvailability.addOnSuccessListener { locationAv: LocationAvailability ->
                 Log.d(
-                    "SignInScreen",
+                    "getUserAddress",
                     "locationAv.isLocationAvailable : ${locationAv.isLocationAvailable}"
                 )
             }
                 .addOnFailureListener { exception ->
                     Log.e(
-                        "SignInScreen",
+                        "getUserAddress",
                         "LocationAvailability ${exception}"
                     )
                 }
+            delay(3000)
+            Log.d(
+                "getUserAddress","userAddress4: ${userAddress}"
+            )
+            return userAddress
         }
+
+        Log.d(
+            "getUserAddress","userAddress4: ${userAddress}"
+        )
         return userAddress
     }
 
@@ -310,10 +338,10 @@ class ArtApp : ComponentActivity() {
         var addresses: MutableList<Address>? = null
         try {
             Log.d(
-                "SignInScreenLocation",
+                "getAddress",
                 "lat ${lat} + long ${long}"
             )
-            Log.d("SignInScreenLocation", "addresses for ${geocoder.getFromLocation(lat, long, 1)}")
+            Log.d("getAddress", "addresses for ${geocoder.getFromLocation(lat, long, 1)}")
             addresses = geocoder.getFromLocation(lat, long, 5)
 
             if (addresses != null && addresses.isNotEmpty()) {
@@ -323,10 +351,10 @@ class ArtApp : ComponentActivity() {
             } else {
                 Toast.makeText(applicationContext, "Address not found", Toast.LENGTH_LONG).show()
             }
-            Log.d("SignInScreenLocation", "address ${addresses}")
+            Log.d("getAddress", "address ${addresses}")
         } catch (e: Exception) {
             Log.e(
-                "SignInScreenLocation",
+                "getAddress",
                 "LocationAvailability ${e}"
             )
         }

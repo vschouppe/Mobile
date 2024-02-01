@@ -1,5 +1,6 @@
 package com.vschouppe.artapp.signin
 
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -54,11 +55,15 @@ fun SignInScreen(
                     .padding(16.dp),
                 contentAlignment = Alignment.Center
             ) {
-                Text(
-                    text = state.welcomeText,
-                    style = MaterialTheme.typography.displaySmall,
-                    color = MaterialTheme.colorScheme.primary
-                )
+                Log.d("SignIn Box","city ${state.address?.city}")
+                if (state.address?.city != null){
+                    Text(
+                        text = stringResource(id = R.string.signin_welcome_initial) + " ${state.address?.city}",
+                        style = MaterialTheme.typography.displaySmall,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                }
+
             }
         }
         Row(

@@ -27,11 +27,4 @@ class SignInViewModel: ViewModel() {
         ) }
     }
 
-    fun updateWelcomeText(text: String) {
-        _state.update {
-            it.copy(
-                welcomeText = text
-            )
-        }
-    }
 }
