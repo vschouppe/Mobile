@@ -1,5 +1,6 @@
 package com.vschouppe.artapp.profile
 
+import android.util.Log
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Button
@@ -32,6 +33,7 @@ fun ProfileScreen(
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        Log.d("ProfileScreen","pic url : ${userData?.profilePictureUrl}")
         if(userData?.profilePictureUrl != null) {
             AsyncImage(
                 model = userData.profilePictureUrl,

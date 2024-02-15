@@ -30,6 +30,7 @@
 <!--    <string name="art_ap_google_web_client_id">74689574541-oqhu4nanq5nukjafn51vk41lfpik9uau.apps.googleusercontent.com</string>-->
 <!--    <string name="google_web_client_id">74689574541-265l94nfid07vp6t116bt34it3gt1ean.apps.googleusercontent.com</string>-->
     <string name="firebase_web_client_id">74689574541-265l94nfid07vp6t116bt34it3gt1ean.apps.googleusercontent.com</string>
+    <string name="google_web_client_id">74689574541-kq8209stu4goar54qaet5qu463733sur.apps.googleusercontent.com</string>
 <!--    <string name="firebase_web_client_id">74689574541-2tbg24kjnoo0v3dejehcjg06cafj543e.apps.googleusercontent.com</string>-->
 
     //Google sign in
