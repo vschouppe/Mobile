@@ -44,6 +44,7 @@ import java.util.UUID
 fun SignInScreen(
     state: SignInState,
     onSignInClick: () -> Unit,
+    googleWithCredentialManagerSignin: () -> Unit,
     locationClick: () -> Unit
 ) {
     val context = LocalContext.current
@@ -121,7 +122,9 @@ fun SignInScreen(
                     .padding(16.dp),
                 contentAlignment = Alignment.Center
             ) {
-                GoogleSignInButton(state)
+                Button( onClick = googleWithCredentialManagerSignin) {
+                    Text(text =  "Google Sign In through Cred manager")
+                }
             }
 
         }
@@ -145,86 +148,5 @@ fun SignInScreen(
                 }
             }
         }
-    }
-}
-
-
-@RequiresApi(34)
-@Composable
-fun GoogleSignInButton(
-    state: SignInState){
-    val viewModel: SignInViewModel = viewModel()
-    Log.d("GoogleSignInButton","start")
-    val context = LocalContext.current
-    val coroutine = rememberCoroutineScope()
-
-    val random = UUID.randomUUID().toString()
-    val bytes = random.toByteArray()
-    val md = MessageDigest.getInstance("SHA-256")
-    val digest = md.digest(bytes)
-    val hashedNonce = digest.fold("") {str,it -> str + "%02x".format(it)}
-    Log.d("GoogleSignInButton","got hashedNonce ${hashedNonce}")
-
-    var signIn: () -> Unit = {
-        val credentialManager = CredentialManager.create(context)
-        Log.d("GoogleSignInButton","credentialManager created")
-
-
-        try {
-            val googleIdOption : GetGoogleIdOption =  GetGoogleIdOption.Builder()
-                .setFilterByAuthorizedAccounts(false)
-                .setServerClientId(context.getString(R.string.google_web_client_id))
-                .setNonce(hashedNonce)
-                .build()
-            Log.d("GoogleSignInButton","googleIdOption created")
-            val request : GetCredentialRequest = GetCredentialRequest.Builder()
-                .addCredentialOption(googleIdOption)
-                .build()
-            Log.d("GoogleSignInButton","request created")
-            coroutine.launch {
-                Log.d("GoogleSignInButton","launched")
-                val result = credentialManager.getCredential(
-                    request = request,
-                    context = context
-                )
-                Log.d("GoogleSignInButton","result ${result}")
-                val credentials = result.credential
-                val googleIdTokenCredential =
-                    GoogleIdTokenCredential.createFrom(credentials.data)
-                Log.d("GoogleSignInButton","googleIdTokenCredential created")
-                val token = googleIdTokenCredential.idToken
-                Toast.makeText(context, "Successfully logged in ", Toast.LENGTH_LONG).show()
-                googleIdTokenCredential.displayName
-                var user : UserData
-                user =
-                    UserData(
-                        userId = googleIdTokenCredential.id,
-                        username = googleIdTokenCredential.displayName,
-                        profilePictureUrl = googleIdTokenCredential.profilePictureUri.toString()
-                    )
-                Log.d("GoogleSignInButton"," user details : ${user}")
-                delay(1000)
-                Toast.makeText(context, "welcome :${user.username} ", Toast.LENGTH_LONG).show()
-                delay(2000)
-                state.isSignInSuccessful
-                viewModel.onSignInResult(
-                    SignInResult(
-                    data = user?.run { user },
-                    errorMessage = null
-                ))
-            }
-        }catch (e: HttpException){
-            Log.d("GoogleSignInButton",e.message())
-        }catch (e: GetCredentialException){
-            Log.d("GoogleSignInButton","message: " +e.message)
-        }catch (e: GetCredentialCancellationException){
-            Log.d("GoogleSignInButton","message: " +e.message)
-        }
-
-
-    }
-
-    Button( onClick = signIn) {
-        Text(text =  "Google Sign In through Cred manager")
     }
 }

@@ -5,14 +5,16 @@ import android.content.Intent
 import android.content.IntentSender
 import android.util.Log
 import android.widget.Toast
-import androidx.core.app.ActivityCompat.startActivityForResult
+import androidx.annotation.RequiresApi
+import androidx.credentials.CredentialManager
+import androidx.credentials.GetCredentialRequest
 import com.google.android.gms.auth.api.identity.BeginSignInRequest
 import com.google.android.gms.auth.api.identity.BeginSignInRequest.GoogleIdTokenRequestOptions
 import com.google.android.gms.auth.api.identity.SignInClient
-import com.google.android.gms.auth.api.signin.GoogleSignInOptions
-import com.google.android.gms.common.api.Scope
 import com.google.android.gms.tasks.Task
 import com.google.android.gms.tasks.Tasks
+import com.google.android.libraries.identity.googleid.GetGoogleIdOption
+import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import com.google.firebase.auth.GetTokenResult
 import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.auth.ktx.auth
@@ -20,6 +22,8 @@ import com.google.firebase.ktx.Firebase
 import com.vschouppe.artapp.R
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.tasks.await
+import java.security.MessageDigest
+import java.util.UUID
 
 
 class GoogleAuthUiClient(
@@ -27,6 +31,8 @@ class GoogleAuthUiClient(
     private val oneTapClient: SignInClient
 ) {
     private val auth = Firebase.auth
+    private val googleWebID = R.string.google_web_client_id
+    private var googleIdTokenCredential: GoogleIdTokenCredential? = null
 
 
     suspend fun signIn(): IntentSender? {
@@ -91,12 +97,23 @@ class GoogleAuthUiClient(
         }
     }
 
-    fun getSignedInUser(): UserData? = auth.currentUser?.run {
-        UserData(
-            userId = uid,
-            username = displayName,
-            profilePictureUrl = photoUrl?.toString()
-        )
+    fun getSignedInUser(): UserData?  {
+        var user: UserData? = null
+        if (auth.currentUser !=null){
+            user = UserData(
+                userId = auth.uid,
+                username = auth.currentUser!!.displayName,
+                profilePictureUrl = auth.currentUser!!.photoUrl?.toString()
+            )
+        }else if (googleIdTokenCredential != null){
+//            how do get the user details
+            user = UserData(
+                userId = googleIdTokenCredential?.id,
+                username = googleIdTokenCredential?.displayName,
+                profilePictureUrl = googleIdTokenCredential?.profilePictureUri?.toString()
+            )
+        }
+        return user
     }
 
     // Function to get an access token
@@ -118,6 +135,79 @@ class GoogleAuthUiClient(
             )
             .setAutoSelectEnabled(true)
             .build()
+    }
+
+
+    @RequiresApi(34)
+    suspend fun GoogleSignIn(context : Context) : SignInResult{
+        Log.d("GoogleSignInButton","start")
+        Log.d("googleWithCredentialManagerSignin", "inside lifecyclescope: ${context}")
+
+        val random = UUID.randomUUID().toString()
+        val bytes = random.toByteArray()
+        val md = MessageDigest.getInstance("SHA-256")
+        val digest = md.digest(bytes)
+        val hashedNonce = digest.fold("") {str,it -> str + "%02x".format(it)}
+        Log.d("GoogleSignInButton","got hashedNonce ${hashedNonce}")
+
+        return try {
+
+            val credentialManager = CredentialManager.create(context)
+            Log.d("GoogleSignInButton","credentialManager created")
+
+            val googleIdOption: GetGoogleIdOption = GetGoogleIdOption.Builder()
+                .setFilterByAuthorizedAccounts(false)
+                .setServerClientId(context.getString(googleWebID))
+                .setNonce(hashedNonce)
+                .build()
+            Log.d("GoogleSignInButton", "googleIdOption created")
+            val request: GetCredentialRequest = GetCredentialRequest.Builder()
+                .addCredentialOption(googleIdOption)
+                .build()
+            Log.d("GoogleSignInButton", "request created")
+            Log.d("GoogleSignInButton", "launched")
+            Log.d("googleWithCredentialManagerSignin", "inside lifecyclescope: ${context}")
+            val result = credentialManager.getCredential(
+                request = request,
+                context = context
+            )
+            Log.d("GoogleSignInButton", "result ${result}")
+            val credentials = result.credential
+            googleIdTokenCredential = GoogleIdTokenCredential.createFrom(credentials.data)
+            Log.d("GoogleSignInButton", "googleIdTokenCredential created")
+            Log.d("GoogleSignInButton", "googleIdTokenCredential ${googleIdTokenCredential!!.id}")
+            Log.d("GoogleSignInButton", "googleIdTokenCredential ${googleIdTokenCredential!!.idToken}")
+            Toast.makeText(context, "Successfully logged in ${googleIdTokenCredential!!.displayName}", Toast.LENGTH_LONG).show()
+
+            var user: UserData
+            user =
+                UserData(
+                    userId = googleIdTokenCredential!!.id,
+                    username = googleIdTokenCredential!!.displayName,
+                    profilePictureUrl = googleIdTokenCredential!!.profilePictureUri.toString()
+                )
+            Log.d("GoogleSignInButton", " user details : ${user}")
+//            delay(1000)
+            Toast.makeText(context, "welcome :${user.username} ", Toast.LENGTH_LONG).show()
+//            delay(2000)
+            SignInResult(
+                data = user?.run {
+                    UserData(
+                        userId = user.userId,
+                        username = user.username,
+                        profilePictureUrl = user.profilePictureUrl?.toString()
+                    )
+                },
+                errorMessage = null
+            )
+        } catch(e: Exception) {
+            e.printStackTrace()
+//            if(e is GetCredentialException || e is CancellationException) throw e
+            SignInResult(
+                data = null,
+                errorMessage = e.message
+            )
+        }
     }
 
 }

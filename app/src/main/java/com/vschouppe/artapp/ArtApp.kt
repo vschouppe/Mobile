@@ -47,6 +47,7 @@ import com.google.android.libraries.identity.googleid.GetGoogleIdOption
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import com.vschouppe.artapp.profile.ProfileScreen
 import com.vschouppe.artapp.signin.GoogleAuthUiClient
+import com.vschouppe.artapp.signin.SignInResult
 import com.vschouppe.artapp.signin.SignInScreen
 import com.vschouppe.artapp.signin.SignInViewModel
 import com.vschouppe.artapp.signin.UserAddress
@@ -78,6 +79,7 @@ class ArtApp : ComponentActivity() {
         )
     }
 
+    @RequiresApi(34)
     @SuppressLint("MissingPermission")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -133,6 +135,7 @@ class ArtApp : ComponentActivity() {
                                             val signInResult = googleAuthUiClient.signInWithIntent(
                                                 intent = result.data ?: return@launch
                                             )
+                                            Log.d("launcher", "signInResult ${signInResult}")
                                             viewModel.onSignInResult(signInResult)
                                             Log.d(
                                                 "signInResult",
@@ -149,6 +152,7 @@ class ArtApp : ComponentActivity() {
                                     }
                                 }
                             )
+
 //                            LaunchedEffect(key1 = state.address) {
 //                                if (state.address != null) {
 //                                    viewModel.updateAddress()
@@ -161,8 +165,9 @@ class ArtApp : ComponentActivity() {
                                         "Sign in successful",
                                         Toast.LENGTH_LONG
                                     ).show()
-
+                                    Log.d("googleWithCredentialManagerSignin", "pre nav to profile")
                                     navController.navigate("profile")
+                                    Log.d("googleWithCredentialManagerSignin", "${viewModel.state}")
                                     viewModel.resetState()
                                 }
                             }
@@ -170,6 +175,15 @@ class ArtApp : ComponentActivity() {
                             // Get the Context using LocalContext
                             SignInScreen(
                                 state = state,
+                                googleWithCredentialManagerSignin = {
+                                    val activityContext = this@ArtApp
+                                    lifecycleScope.launch {
+                                        Log.d("googleWithCredentialManagerSignin", "pre googleWithCredentialManagerSignin")
+                                        val sir : SignInResult = googleAuthUiClient.GoogleSignIn(activityContext)
+                                        Log.d("googleWithCredentialManagerSignin", "sir ${sir}")
+                                        viewModel.onSignInResult(sir)
+                                    }
+                                },
                                 onSignInClick = {
                                     Log.d("SignInScreen", "launching event")
                                     lifecycleScope.launch {
