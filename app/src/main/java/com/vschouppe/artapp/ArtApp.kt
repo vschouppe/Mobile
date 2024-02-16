@@ -3,7 +3,6 @@ package com.vschouppe.artapp
 import android.Manifest
 import android.annotation.SuppressLint
 import android.content.pm.PackageManager
-import android.credentials.GetCredentialException
 import android.location.Address
 import android.location.Geocoder
 import android.location.Location
@@ -17,20 +16,12 @@ import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.stringResource
 import androidx.core.app.ActivityCompat
-import androidx.credentials.CredentialManager
-import androidx.credentials.GetCredentialRequest
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -43,8 +34,6 @@ import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.Scope
 import com.google.android.gms.location.LocationAvailability
 import com.google.android.gms.location.LocationServices
-import com.google.android.libraries.identity.googleid.GetGoogleIdOption
-import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import com.vschouppe.artapp.profile.ProfileScreen
 import com.vschouppe.artapp.signin.GoogleAuthUiClient
 import com.vschouppe.artapp.signin.SignInResult
@@ -53,13 +42,24 @@ import com.vschouppe.artapp.signin.SignInViewModel
 import com.vschouppe.artapp.signin.UserAddress
 import com.vschouppe.artapp.theme.MobileAppsPlaygroundTheme
 import com.vschouppe.artapp.zoe.ArtWindow
+import io.github.jan.supabase.createSupabaseClient
+import io.github.jan.supabase.gotrue.Auth
+import io.github.jan.supabase.postgrest.Postgrest
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import retrofit2.HttpException
 import java.io.IOException
-import java.security.MessageDigest
-import java.util.UUID
 
+
+val supabase = createSupabaseClient(
+    supabaseUrl = "https://seklykjnuhwrcsrwbbst.supabase.co",
+    supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNla2x5a2pudWh3cmNzcndiYnN0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MDgwNTAwMjcsImV4cCI6MjAyMzYyNjAyN30.M-yIZB72FkSkLv3onuRcWISr4l1UTbG8SOUtzOOCyLc"
+) {
+    install(Auth){
+
+    }
+    install(Postgrest){}
+}
 
 class ArtApp : ComponentActivity() {
 

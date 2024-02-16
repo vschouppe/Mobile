@@ -20,6 +20,7 @@ import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.vschouppe.artapp.R
 import com.vschouppe.artapp.signin.UserData
+import com.vschouppe.artapp.supabase.database.dbButton
 
 @Composable
 fun ProfileScreen(
@@ -63,5 +64,6 @@ fun ProfileScreen(
         Button(onClick = loadAlbums) {
             Text(text = stringResource(id = R.string.action_load_albums))
         }
+        dbButton()
     }
 }

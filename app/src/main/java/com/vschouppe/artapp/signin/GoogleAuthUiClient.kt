@@ -20,6 +20,13 @@ import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
 import com.vschouppe.artapp.R
+import com.vschouppe.artapp.supabase
+import io.github.jan.supabase.exceptions.NotFoundRestException
+import io.github.jan.supabase.exceptions.RestException
+import io.github.jan.supabase.gotrue.auth
+import io.github.jan.supabase.gotrue.providers.Google
+import io.github.jan.supabase.gotrue.providers.builtin.IDToken
+import io.github.jan.supabase.postgrest.from
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.tasks.await
 import java.security.MessageDigest
@@ -143,8 +150,8 @@ class GoogleAuthUiClient(
         Log.d("GoogleSignInButton","start")
         Log.d("googleWithCredentialManagerSignin", "inside lifecyclescope: ${context}")
 
-        val random = UUID.randomUUID().toString()
-        val bytes = random.toByteArray()
+        val rawNonce = UUID.randomUUID().toString()
+        val bytes = rawNonce.toByteArray()
         val md = MessageDigest.getInstance("SHA-256")
         val digest = md.digest(bytes)
         val hashedNonce = digest.fold("") {str,it -> str + "%02x".format(it)}
@@ -174,10 +181,25 @@ class GoogleAuthUiClient(
             Log.d("GoogleSignInButton", "result ${result}")
             val credentials = result.credential
             googleIdTokenCredential = GoogleIdTokenCredential.createFrom(credentials.data)
+            var googleIdToken = googleIdTokenCredential!!.idToken
             Log.d("GoogleSignInButton", "googleIdTokenCredential created")
             Log.d("GoogleSignInButton", "googleIdTokenCredential ${googleIdTokenCredential!!.id}")
-            Log.d("GoogleSignInButton", "googleIdTokenCredential ${googleIdTokenCredential!!.idToken}")
+            Log.d("GoogleSignInButton", "googleIdTokenCredential ${googleIdToken}")
             Toast.makeText(context, "Successfully logged in ${googleIdTokenCredential!!.displayName}", Toast.LENGTH_LONG).show()
+
+            supabase.auth.signInWith(IDToken){
+                idToken= googleIdToken
+                provider= Google
+                nonce = rawNonce
+            }
+            try {
+                supabase.from("login").insert(mapOf("content" to "LOGIN"))
+                Log.d("DB_WRITE","Written login to DB ")
+            }catch(e: RestException){
+                Log.e("DB_WRITE","something went wrong + ${e}")
+            }catch(e: NotFoundRestException){
+                Log.e("DB_WRITE","something went wrong + ${e}")
+            }
 
             var user: UserData
             user =

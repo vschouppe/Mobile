@@ -38,6 +38,8 @@
     <string name="google_signed_in">You are logged into Google</string>
     <string name="google_signed_in_failed">Your google sign in failed</string>
 
+<!--    supabase-->
+    <string name="table_name_login">login</string>
 
 
 </resources>
