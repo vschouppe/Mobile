@@ -31,9 +31,16 @@ import androidx.navigation.compose.rememberNavController
 import com.google.android.gms.auth.api.identity.Identity
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
+import com.google.android.gms.common.api.ApiException
 import com.google.android.gms.common.api.Scope
 import com.google.android.gms.location.LocationAvailability
 import com.google.android.gms.location.LocationServices
+import com.google.api.gax.core.FixedCredentialsProvider
+import com.google.auth.Credentials
+import com.google.photos.library.v1.PhotosLibraryClient
+import com.google.photos.library.v1.PhotosLibrarySettings
+import com.google.photos.library.v1.internal.InternalPhotosLibraryClient.ListAlbumsPagedResponse
+import com.vschouppe.artapp.network.MarsApi
 import com.vschouppe.artapp.profile.ProfileScreen
 import com.vschouppe.artapp.signin.GoogleAuthUiClient
 import com.vschouppe.artapp.signin.SignInResult
@@ -86,8 +93,6 @@ class ArtApp : ComponentActivity() {
 
         Log.d("onCreate", "mGoogleSignInClient start")
 
-        Log.d("onCreate", "gso: ${gso}")
-//        Log.d("onCreate","mGoogleSignInClient: ${googleSignInClient}")
         val account = GoogleSignIn.getLastSignedInAccount(this)
         Log.d("onCreate", "account: ${account}")
 
@@ -116,6 +121,7 @@ class ArtApp : ComponentActivity() {
                             LaunchedEffect(key1 = Unit) {
                                 if (googleAuthUiClient.getSignedInUser() != null) {
                                     navController.navigate("profile")
+                                    Log.d("sign_in","User ${googleAuthUiClient.getSignedInUser()} still signed in")
                                 }
                                 checkLocationPermissions()
                                 val userAddress: UserAddress? = getUserAddress()
@@ -179,7 +185,7 @@ class ArtApp : ComponentActivity() {
                                     val activityContext = this@ArtApp
                                     lifecycleScope.launch {
                                         Log.d("googleWithCredentialManagerSignin", "pre googleWithCredentialManagerSignin")
-                                        val sir : SignInResult = googleAuthUiClient.GoogleSignIn(activityContext)
+                                        val sir : SignInResult = googleAuthUiClient.GoogleSignIn(activityContext, activity)
                                         Log.d("googleWithCredentialManagerSignin", "sir ${sir}")
                                         viewModel.onSignInResult(sir)
                                     }
@@ -235,12 +241,53 @@ class ArtApp : ComponentActivity() {
                                         Log.d("GoogleAPI", "We're loading the google albums")
                                         try {
 //                                            signIn()
-//                                            val token =  account?.serverAuthCode
+                                            val token =  googleAuthUiClient.getAccessToken()
 //                                            Log.d("GoogleAPI","token ${token}")
-//                                            if (token!=null){
-//                                                val listResult = GoogleApi.retrofitService.getAlbums("Bearer ${token}")
-//                                                Log.d("GoogleAPI","albums ${listResult}")
-//                                            }
+                                            if (token!=null){
+                                                val listResult = MarsApi.retrofitService.getPhotos()
+                                                Log.d("GoogleAPI","MarsApi ${listResult}")
+                                                Log.d("GoogleAPI","Now Lets get Google albums")
+                                                Log.d("GoogleAPI","with token ${token}")
+                                                var creds : Credentials = googleAuthUiClient.getUserCredentials(token)
+                                                Log.d("GoogleAPI","Google authenticationType ${creds.authenticationType}")
+                                                Log.d("GoogleAPI","Google requestMetadata ${creds.requestMetadata}")
+                                                var settings = PhotosLibrarySettings.newBuilder()
+                                                    .setCredentialsProvider(
+                                                        FixedCredentialsProvider.create(creds)
+                                                    )
+                                                    .build();
+                                                Log.d("GoogleAPI","Google settings ${settings}")
+                                                try {
+                                                    PhotosLibraryClient.initialize(settings)
+                                                        .use { photosLibraryClient ->
+                                                            Log.d("GoogleAPI","Google photosLibraryClient ${photosLibraryClient}")
+                                                            var response : ListAlbumsPagedResponse = photosLibraryClient.listAlbums()
+                                                            for (album in response.iterateAll()) {
+                                                                // Get some properties of an album
+                                                                val id = album.id
+                                                                val title = album.title
+                                                                val productUrl = album.productUrl
+                                                                val coverPhotoBaseUrl =
+                                                                    album.coverPhotoBaseUrl
+                                                                // The cover photo media item id field may be empty
+                                                                val coverPhotoMediaItemId =
+                                                                    album.coverPhotoMediaItemId
+                                                                val isWritable = album.isWriteable
+                                                                val mediaItemsCount =
+                                                                    album.mediaItemsCount
+                                                            }
+                                                        }
+                                                } catch (e: ApiException) {
+                                                    Log.d("GoogleAPI","Google albums ApiException ${e}")
+                                                    // Error during album creation
+                                                } catch( e: HttpException){
+                                                    Log.d("GoogleAPI","Google albums HttpException ${e}")
+                                                } catch( e: Exception){
+                                                    Log.d("GoogleAPI","Google stackTrace ${e.stackTrace}")
+                                                    Log.d("GoogleAPI","Google message ${e.message}")
+                                                    Log.d("GoogleAPI","Google e ${e.toString()}")
+                                                }
+                                            }
                                         } catch (e: IOException) {
                                             Log.d("GoogleAPI", "IOException ${e}")
                                         } catch (e: HttpException) {

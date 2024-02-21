@@ -48,6 +48,8 @@ android {
     packaging {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
+            excludes += "/META-INF/DEPENDENCIES"
+            excludes += "/META-INF/INDEX.LIST"
         }
     }
 }
@@ -100,5 +102,6 @@ dependencies {
     implementation("io.github.jan-tennert.supabase:postgrest-kt")
     implementation("io.github.jan-tennert.supabase:gotrue-kt:2.1.3")
     implementation("io.ktor:ktor-client-android:2.3.8")
-
+    implementation("com.google.photos.library:google-photos-library-client:1.7.3")
+    implementation("io.grpc:grpc-okhttp:1.61.0")
 }

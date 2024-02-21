@@ -7,18 +7,25 @@ import android.util.Log
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.credentials.CredentialManager
+import androidx.credentials.CustomCredential
 import androidx.credentials.GetCredentialRequest
+import androidx.credentials.GetCredentialResponse
+import androidx.credentials.PasswordCredential
+import androidx.credentials.PublicKeyCredential
 import com.google.android.gms.auth.api.identity.BeginSignInRequest
 import com.google.android.gms.auth.api.identity.BeginSignInRequest.GoogleIdTokenRequestOptions
 import com.google.android.gms.auth.api.identity.SignInClient
-import com.google.android.gms.tasks.Task
-import com.google.android.gms.tasks.Tasks
+import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.libraries.identity.googleid.GetGoogleIdOption
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
-import com.google.firebase.auth.GetTokenResult
+import com.google.android.libraries.identity.googleid.GoogleIdTokenParsingException
+import com.google.auth.Credentials
+import com.google.auth.oauth2.AccessToken
+import com.google.auth.oauth2.UserCredentials
 import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
+import com.vschouppe.artapp.ArtApp
 import com.vschouppe.artapp.R
 import com.vschouppe.artapp.supabase
 import io.github.jan.supabase.exceptions.NotFoundRestException
@@ -39,8 +46,19 @@ class GoogleAuthUiClient(
 ) {
     private val auth = Firebase.auth
     private val googleWebID = R.string.google_web_client_id
-    private var googleIdTokenCredential: GoogleIdTokenCredential? = null
+    var googleIdTokenCredential: GoogleIdTokenCredential? = null
+    private var googelSignInClient : GoogleSignInClient? =null
+    private var credentialManager : CredentialManager? =null
 
+    suspend fun getUserCredentials(token: String): Credentials {
+
+        val a = AccessToken(token, null)
+        return UserCredentials.newBuilder()
+            .setClientId("74689574541-kq8209stu4goar54qaet5qu463733sur.apps.googleusercontent.com")
+            .setClientSecret(googleWebID.toString())
+            .setAccessToken(a)
+            .build()
+    }
 
     suspend fun signIn(): IntentSender? {
         Log.d("signIn"," start signIn build awaiting result")
@@ -96,8 +114,12 @@ class GoogleAuthUiClient(
 
     suspend fun signOut() {
         try {
+            Log.d("signOut","Starting signOut duties ${oneTapClient?.toString()}")
             oneTapClient.signOut().await()
             auth.signOut()
+            Log.d("signOut","Starting signOut duties ${googelSignInClient?.toString()}")
+            credentialManager
+            Log.d("signOut","All signOut duties finished")
         } catch(e: Exception) {
             e.printStackTrace()
             if(e is CancellationException) throw e
@@ -124,10 +146,13 @@ class GoogleAuthUiClient(
     }
 
     // Function to get an access token
-    fun getAccessToken(): Task<GetTokenResult> {
+    fun getAccessToken(): String {
         // Force refresh to get a new token
-        return auth.currentUser?.getIdToken(true)
-            ?: Tasks.forException(Exception("User not signed in")) // Replace this with appropriate error handling
+        var token = ""
+        if (googleIdTokenCredential != null){
+            token= googleIdTokenCredential!!.idToken
+        }
+        return token
     }
 
     private fun buildSignInRequest(): BeginSignInRequest {
@@ -146,7 +171,7 @@ class GoogleAuthUiClient(
 
 
     @RequiresApi(34)
-    suspend fun GoogleSignIn(context : Context) : SignInResult{
+    suspend fun GoogleSignIn(context: Context, activity: ArtApp) : SignInResult{
         Log.d("GoogleSignInButton","start")
         Log.d("googleWithCredentialManagerSignin", "inside lifecyclescope: ${context}")
 
@@ -159,7 +184,7 @@ class GoogleAuthUiClient(
 
         return try {
 
-            val credentialManager = CredentialManager.create(context)
+            credentialManager = CredentialManager.create(context)
             Log.d("GoogleSignInButton","credentialManager created")
 
             val googleIdOption: GetGoogleIdOption = GetGoogleIdOption.Builder()
@@ -174,13 +199,11 @@ class GoogleAuthUiClient(
             Log.d("GoogleSignInButton", "request created")
             Log.d("GoogleSignInButton", "launched")
             Log.d("googleWithCredentialManagerSignin", "inside lifecyclescope: ${context}")
-            val result = credentialManager.getCredential(
+            val result = credentialManager!!.getCredential(
                 request = request,
                 context = context
             )
-            Log.d("GoogleSignInButton", "result ${result}")
-            val credentials = result.credential
-            googleIdTokenCredential = GoogleIdTokenCredential.createFrom(credentials.data)
+            handleSignIn(result)
             var googleIdToken = googleIdTokenCredential!!.idToken
             Log.d("GoogleSignInButton", "googleIdTokenCredential created")
             Log.d("GoogleSignInButton", "googleIdTokenCredential ${googleIdTokenCredential!!.id}")
@@ -200,7 +223,6 @@ class GoogleAuthUiClient(
             }catch(e: NotFoundRestException){
                 Log.e("DB_WRITE","something went wrong + ${e}")
             }
-
             var user: UserData
             user =
                 UserData(
@@ -209,9 +231,7 @@ class GoogleAuthUiClient(
                     profilePictureUrl = googleIdTokenCredential!!.profilePictureUri.toString()
                 )
             Log.d("GoogleSignInButton", " user details : ${user}")
-//            delay(1000)
             Toast.makeText(context, "welcome :${user.username} ", Toast.LENGTH_LONG).show()
-//            delay(2000)
             SignInResult(
                 data = user?.run {
                     UserData(
@@ -229,6 +249,45 @@ class GoogleAuthUiClient(
                 data = null,
                 errorMessage = e.message
             )
+        }
+    }
+
+    fun handleSignIn(result: GetCredentialResponse) {
+        val handleSignIn_TAG = "handleSignIn"
+        // Handle the successfully returned credential.
+        val credential = result.credential
+
+        when (credential) {
+
+            is PublicKeyCredential -> {
+                val responseJson = credential.authenticationResponseJson
+                // Share responseJson i.e. a GetCredentialResponse on your server to
+                // validate and  authenticate
+                Log.e(handleSignIn_TAG, "responseJson : ${responseJson}")
+            }
+            is PasswordCredential -> {
+                val username = credential.id
+                val password = credential.password
+                Log.e(handleSignIn_TAG, "PasswordCredential : ${username} & ${password}")
+                // Use id and password to send to your server to validate
+                // and authenticate
+            }
+            is CustomCredential -> {
+                if (credential.type == GoogleIdTokenCredential.TYPE_GOOGLE_ID_TOKEN_CREDENTIAL) {
+                    try {
+                        // Use googleIdTokenCredential and extract id to validate and
+                        // authenticate on your server.
+                        googleIdTokenCredential = GoogleIdTokenCredential
+                            .createFrom(credential.data)
+                        Log.d(handleSignIn_TAG, " TYPE_GOOGLE_ID_TOKEN_CREDENTIAL credential ${credential}")
+                    } catch (e: GoogleIdTokenParsingException) {
+                        Log.e(handleSignIn_TAG, "Received an invalid google id token response", e)
+                    }
+                } else {
+                    // Catch any unrecognized custom credential type here.
+                    Log.e(handleSignIn_TAG, "Unexpected type of credential")
+                }
+            }
         }
     }
 
