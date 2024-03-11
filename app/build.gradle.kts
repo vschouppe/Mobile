@@ -104,4 +104,5 @@ dependencies {
     implementation("io.ktor:ktor-client-android:2.3.8")
     implementation("com.google.photos.library:google-photos-library-client:1.7.3")
     implementation("io.grpc:grpc-okhttp:1.61.0")
+    implementation("com.squareup.okhttp:okhttp:2.7.5")
 }

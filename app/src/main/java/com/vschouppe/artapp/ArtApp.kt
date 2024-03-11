@@ -12,7 +12,6 @@ import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
-import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.fillMaxSize
@@ -30,17 +29,26 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.google.android.gms.auth.api.identity.Identity
 import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
-import com.google.android.gms.common.api.ApiException
+import com.google.android.gms.common.Scopes
 import com.google.android.gms.common.api.Scope
 import com.google.android.gms.location.LocationAvailability
 import com.google.android.gms.location.LocationServices
 import com.google.api.gax.core.FixedCredentialsProvider
 import com.google.auth.Credentials
-import com.google.photos.library.v1.PhotosLibraryClient
+import com.google.auth.oauth2.AccessToken
 import com.google.photos.library.v1.PhotosLibrarySettings
-import com.google.photos.library.v1.internal.InternalPhotosLibraryClient.ListAlbumsPagedResponse
+import com.squareup.okhttp.Callback
+import com.squareup.okhttp.FormEncodingBuilder
+import com.squareup.okhttp.OkHttpClient
+import com.squareup.okhttp.Request
+import com.squareup.okhttp.RequestBody
+import com.squareup.okhttp.Response
+import com.vschouppe.artapp.network.GoogleAccountApi
+import com.vschouppe.artapp.network.GoogleAccountsService
 import com.vschouppe.artapp.network.MarsApi
+import com.vschouppe.artapp.network.UserCode
 import com.vschouppe.artapp.profile.ProfileScreen
 import com.vschouppe.artapp.signin.GoogleAuthUiClient
 import com.vschouppe.artapp.signin.SignInResult
@@ -54,6 +62,8 @@ import io.github.jan.supabase.gotrue.Auth
 import io.github.jan.supabase.postgrest.Postgrest
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import org.json.JSONException
+import org.json.JSONObject
 import retrofit2.HttpException
 import java.io.IOException
 
@@ -85,6 +95,8 @@ class ArtApp : ComponentActivity() {
             oneTapClient = Identity.getSignInClient(applicationContext)
         )
     }
+    private val mGoogleSignInClient: GoogleSignInClient? = null
+    private val RC_GET_AUTH_CODE = 9003
 
     @RequiresApi(34)
     @SuppressLint("MissingPermission")
@@ -95,6 +107,20 @@ class ArtApp : ComponentActivity() {
 
         val account = GoogleSignIn.getLastSignedInAccount(this)
         Log.d("onCreate", "account: ${account}")
+        val serverClientId = getString(R.string.google_web_client_id)
+        val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+            .requestScopes(Scope(Scopes.DRIVE_APPFOLDER))
+            .requestServerAuthCode(serverClientId)
+            .requestEmail()
+            .build()
+        // [END configure_signin]
+
+        // Build GoogleAPIClient with the Google Sign-In API and the above options.
+        // [END configure_signin]
+
+        // Build GoogleAPIClient with the Google Sign-In API and the above options.
+        var mGoogleSignInClient = GoogleSignIn.getClient(this, gso);
+
 
         setContent {
             MobileAppsPlaygroundTheme {
@@ -159,6 +185,35 @@ class ArtApp : ComponentActivity() {
                                 }
                             )
 
+
+                            val googleSigninApiLauncher = rememberLauncherForActivityResult(
+                                contract = ActivityResultContracts.StartIntentSenderForResult(),
+                                onResult = { result ->
+                                    Log.d("launcher", "result code ${result.resultCode}")
+//                                    if (result.resultCode == RESULT_OK) {
+//                                        lifecycleScope.launch {
+//
+//                                            val signInResult = googleAuthUiClient.signInWithIntent(
+//                                                intent = result.data ?: return@launch
+//                                            )
+//                                            Log.d("launcher", "signInResult ${signInResult}")
+//                                            viewModel.onSignInResult(signInResult)
+//                                            Log.d(
+//                                                "signInResult",
+//                                                " signInResult data ${signInResult.data} and" +
+//                                                        "${signInResult.errorMessage} or ${signInResult.toString()}"
+//                                            )
+//                                        }
+//                                    } else if (result.resultCode == RESULT_CANCELED) {
+//                                        Toast.makeText(
+//                                            applicationContext,
+//                                            "StartIntentSenderForResult result cancelled",
+//                                            Toast.LENGTH_LONG
+//                                        ).show()
+//                                    }
+                                }
+                            )
+
 //                            LaunchedEffect(key1 = state.address) {
 //                                if (state.address != null) {
 //                                    viewModel.updateAddress()
@@ -193,14 +248,64 @@ class ArtApp : ComponentActivity() {
                                 onSignInClick = {
                                     Log.d("SignInScreen", "launching event")
                                     lifecycleScope.launch {
-                                        Log.d("SignInScreen", "pre googleAuthUiClient signIn")
-                                        val signInIntentSender = googleAuthUiClient.signIn()
-                                        launcher.launch(
-                                            IntentSenderRequest.Builder(
-                                                signInIntentSender ?: return@launch
-                                            ).build()
-                                        )
-                                        Log.d("SignInScreen", "post googleAuthUiClient signIn")
+
+                                        Log.d("SignInScreen","start UserCode")
+                                        try{
+                                            val service = GoogleAccountApi.retrofitService
+                                            Log.d("SignInScreen","service.toString() ${service.toString()} ")
+
+                                            val listResult = MarsApi.retrofitService.getPhotos()
+
+                                            Log.d("SignInScreen","mars list ${listResult} ")
+
+//                                            val userCode : UserCode? = service.getUserCode(
+//                                               "74689574541-nrhrj8i24ogc9r3b6t89vjftnodrc07k.apps.googleusercontent.com",
+//                                                "https://www.googleapis.com/auth/photoslibrary.readonly"
+//                                            )
+                                            val userCode : UserCode? = service.getUserCode(
+                                               "74689574541-3sq4b47jsepnbbgqduapilsr5pff40ug.apps.googleusercontent.com",
+                                                "email profile"
+                                            )
+                                            Log.d("SignInScreen","start userCode ${userCode} ")
+
+                                            val accessToken: AccessToken? =
+                                                service.getAccessToken(
+                                                    "74689574541-kq8209stu4goar54qaet5qu463733sur.apps.googleusercontent.com",
+                                                    "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",
+                                                    "4/0AeaYSHCZGXfmcX4qPMwa-Bsxy3XZ3vr7j8qenoiAhnq530UXGHY3LMgJyumCIN1_o8RymQ",
+                                                    GoogleAccountsService.ACCESS_GRANT_TYPE
+                                                )
+                                            Log.d("SignInScreen","start accessToken ${accessToken} ")
+
+//                                            https://accounts.google.com/o/oauth2/v2/auth?
+//                                        // redirect_uri=https%3A%2F%2Fdevelopers.google.com%2Foauthplayground&prompt=consent&response_type=code&client_id=407408718192.apps.googleusercontent.com&scope=https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fphotoslibrary.readonly&access_type=offline
+
+                                        }catch(e: Exception){
+                                            Log.d("SignInScreen","GoogleAccountApi API error: ${e.message} ")
+                                            Log.d("SignInScreen","GoogleAccountApi API error: $e ")
+                                            Log.d("SignInScreen","GoogleAccountApi API error: ${e.stackTrace.toString()} ")
+
+                                        }
+//                                        Get use
+
+
+//                                        Log.d("GoogleAPI","start GoogleAuthApi ")
+//                                        val authToken = GoogleAccountApi.retrofitService.getAccessToken(
+//                                            R.string.google_web_client_id.toString(),
+//                                            R.string.google_web_client_secret.toString(),
+//                                            userCode.getDeviceCode(),
+//                                            GoogleAccountsService.ACCESS_GRANT_TYPE);
+//                                        Log.d("GoogleAPI","GoogleAuthApi ${authToken.toString()}")
+
+//                                        Log.d("SignInScreen", "pre googleAuthUiClient signIn")
+//                                        val signInIntentSender = googleAuthUiClient.signIn()
+//                                        launcher.launch(
+//                                            IntentSenderRequest.Builder(
+//                                                signInIntentSender ?: return@launch
+//                                            ).build()
+//                                        )
+//
+//                                        Log.d("SignInScreen", "post googleAuthUiClient signIn")
                                     }
                                 },
                                 locationClick = {
@@ -242,8 +347,67 @@ class ArtApp : ComponentActivity() {
                                         try {
 //                                            signIn()
                                             val token =  googleAuthUiClient.getAccessToken()
-//                                            Log.d("GoogleAPI","token ${token}")
+
+                                            Log.d("GoogleAPI","token ${token}")
                                             if (token!=null){
+                                                val client = OkHttpClient()
+                                                val requestBody: RequestBody = FormEncodingBuilder()
+                                                    .add("grant_type","authorization_code")
+                                                    .add("client_id", "")
+                                                    .add("client_secret", "")
+                                                    .add("redirect_uri", "")
+                                                    .add("code", R.string.google_web_client_id.toString())
+//                                                    .add("grant_type", "authorization_code")
+//                                                    .add("response_type", "code")
+//                                                    .add("prompt", "consent")
+//                                                    .add("client_id", R.string.client_id_notsure.toString())
+//                                                    .add("client_secret", R.string.google_web_client_secret.toString())
+//                                                    .add("client_secret", "407408718192.apps.googleusercontent.com")
+//                                                    .add("client_secret", "{clientSecret}")
+//                                                    .add("redirect_uri","https://developers.google.com/oauthplayground")
+//                                                    .add("scope", "https://www.googleapis.com/auth/photoslibrary.readonly")
+//                                                    .add("id_token", token) // Added this extra parameter here
+//                                                    .add("id_token", "1//040lafZGVRjrUCgYIARAAGAQSNwF-L9Ir3HPUkZKup4Z59KgCP3qtm55zPpolf7YiutwRPfosTW35J-8Ivg8k15Tom2J_u7NRiHo") // Added this extra parameter here
+//                                                    .add("access_type", "offline") // Added this extra parameter here
+                                                    .build();
+
+
+                                                Log.d("GoogleAPI","requestBody ${requestBody.toString()}")
+                                                val request: Request = Request.Builder()
+                                                    .url("https://www.googleapis.com/oauth2/v4/token")
+//                                                    .url("https://accounts.google.com/o/oauth2/v2/auth")
+                                                    .post(requestBody)
+                                                    .build()
+                                                Log.d("GoogleAPI","request urlString ${request.urlString()}")
+                                                client.newCall(request)
+                                                    .enqueue(object : Callback {
+                                                        override fun onFailure(
+                                                            request: Request?,
+                                                            e: IOException
+                                                        ) {
+                                                            Log.e("GoogleAPI", "failure ${e.toString()}")
+                                                        }
+
+                                                        @Throws(IOException::class)
+                                                        override fun onResponse(response: Response) {
+                                                            try {
+                                                                Log.i("GoogleAPI", "success")
+                                                                Log.i("GoogleAPI", "response ${response.body()}")
+                                                                Log.i("GoogleAPI", "response ${response.body().toString()}")
+                                                                Log.i("GoogleAPI", "response ${response.toString()}")
+                                                                val jsonObject: JSONObject =
+                                                                    JSONObject(
+                                                                        response.toString()
+                                                                    )
+                                                                Log.i("GoogleAPI", "jsonObject : ${jsonObject}")
+                                                                val message = jsonObject.toString(5)
+                                                                Log.i("GoogleAPI", "message : ${message}")
+                                                            } catch (e: JSONException) {
+                                                                e.printStackTrace()
+                                                            }
+                                                        }
+                                                    })
+
                                                 val listResult = MarsApi.retrofitService.getPhotos()
                                                 Log.d("GoogleAPI","MarsApi ${listResult}")
                                                 Log.d("GoogleAPI","Now Lets get Google albums")
@@ -257,36 +421,38 @@ class ArtApp : ComponentActivity() {
                                                     )
                                                     .build();
                                                 Log.d("GoogleAPI","Google settings ${settings}")
-                                                try {
-                                                    PhotosLibraryClient.initialize(settings)
-                                                        .use { photosLibraryClient ->
-                                                            Log.d("GoogleAPI","Google photosLibraryClient ${photosLibraryClient}")
-                                                            var response : ListAlbumsPagedResponse = photosLibraryClient.listAlbums()
-                                                            for (album in response.iterateAll()) {
-                                                                // Get some properties of an album
-                                                                val id = album.id
-                                                                val title = album.title
-                                                                val productUrl = album.productUrl
-                                                                val coverPhotoBaseUrl =
-                                                                    album.coverPhotoBaseUrl
-                                                                // The cover photo media item id field may be empty
-                                                                val coverPhotoMediaItemId =
-                                                                    album.coverPhotoMediaItemId
-                                                                val isWritable = album.isWriteable
-                                                                val mediaItemsCount =
-                                                                    album.mediaItemsCount
-                                                            }
-                                                        }
-                                                } catch (e: ApiException) {
-                                                    Log.d("GoogleAPI","Google albums ApiException ${e}")
-                                                    // Error during album creation
-                                                } catch( e: HttpException){
-                                                    Log.d("GoogleAPI","Google albums HttpException ${e}")
-                                                } catch( e: Exception){
-                                                    Log.d("GoogleAPI","Google stackTrace ${e.stackTrace}")
-                                                    Log.d("GoogleAPI","Google message ${e.message}")
-                                                    Log.d("GoogleAPI","Google e ${e.toString()}")
-                                                }
+//                                                try {
+//                                                    PhotosLibraryClient.initialize(settings)
+//                                                        .use { photosLibraryClient ->
+//                                                            Log.d("GoogleAPI","Google photosLibraryClient: ${photosLibraryClient}")
+//
+//                                                            var response : ListAlbumsPagedResponse = photosLibraryClient.listAlbums()
+//                                                            Log.d("GoogleAPI","Google photosLibraryClient response:${response.toString()}")
+//                                                            for (album in response.iterateAll()) {
+//                                                                // Get some properties of an album
+//                                                                val id = album.id
+//                                                                val title = album.title
+//                                                                val productUrl = album.productUrl
+//                                                                val coverPhotoBaseUrl =
+//                                                                    album.coverPhotoBaseUrl
+//                                                                // The cover photo media item id field may be empty
+//                                                                val coverPhotoMediaItemId =
+//                                                                    album.coverPhotoMediaItemId
+//                                                                val isWritable = album.isWriteable
+//                                                                val mediaItemsCount =
+//                                                                    album.mediaItemsCount
+//                                                            }
+//                                                        }
+//                                                } catch (e: ApiException) {
+//                                                    Log.d("GoogleAPI","Google albums ApiException ${e}")
+//                                                    // Error during album creation
+//                                                } catch( e: HttpException){
+//                                                    Log.d("GoogleAPI","Google albums HttpException ${e}")
+//                                                } catch( e: Exception){
+//                                                    Log.d("GoogleAPI","Google stackTrace ${e.stackTrace}")
+//                                                    Log.d("GoogleAPI","Google message ${e.message}")
+//                                                    Log.d("GoogleAPI","Google e ${e.toString()}")
+//                                                }
                                             }
                                         } catch (e: IOException) {
                                             Log.d("GoogleAPI", "IOException ${e}")

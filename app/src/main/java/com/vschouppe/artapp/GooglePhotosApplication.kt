@@ -16,14 +16,14 @@
 package com.vschouppe.artapp
 
 import android.app.Application
-import com.vschouppe.artapp.data.AppContainer
-import com.vschouppe.artapp.data.DefaultAppContainer
+//import com.vschouppe.artapp.data.AppContainer
+//import com.vschouppe.artapp.data.DefaultAppContainer
 
-class GooglePhotosApplication : Application() {
-    /** AppContainer instance used by the rest of classes to obtain dependencies */
-    lateinit var container: AppContainer
-    override fun onCreate() {
-        super.onCreate()
-        container = DefaultAppContainer()
-    }
-}
+//class GooglePhotosApplication : Application() {
+//    /** AppContainer instance used by the rest of classes to obtain dependencies */
+//    lateinit var container: AppContainer
+//    override fun onCreate() {
+//        super.onCreate()
+//        container = DefaultAppContainer()
+//    }
+//}

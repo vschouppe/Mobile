@@ -14,25 +14,25 @@
  * limitations under the License.
  */
 package com.vschouppe.artapp.data
-
-import com.vschouppe.artapp.network.GoogleApiService
-
-/**
- * Repository that fetch mars photos list from marsApi.
- */
-interface GooglePhotosRepository {
-    /** Fetches list of albums from the GoogleApi */
-    suspend fun getGoogleAlbums(): String
-//    suspend fun getGoogleAlbums(): List<GoogleAlbums>
-}
-
-/**
- * Network Implementation of Repository that fetch mars photos list from marsApi.
- */
-class NetworkGooglePhotosRepository(
-    private val googleApiService: GoogleApiService
-) : GooglePhotosRepository {
-    /** Fetches list of MarsPhoto from marsApi*/
-    override suspend fun getGoogleAlbums(): String = googleApiService.getAlbums()
-//    override suspend fun getGoogleAlbums(): List<GoogleAlbums> = googleApiService.getAlbums()
-}
+//
+//import com.vschouppe.artapp.network.GoogleApiService
+//
+///**
+// * Repository that fetch mars photos list from marsApi.
+// */
+//interface GooglePhotosRepository {
+//    /** Fetches list of albums from the GoogleApi */
+//    suspend fun getGoogleAlbums(): String
+////    suspend fun getGoogleAlbums(): List<GoogleAlbums>
+//}
+//
+///**
+// * Network Implementation of Repository that fetch mars photos list from marsApi.
+// */
+//class NetworkGooglePhotosRepository(
+//    private val googleApiService: GoogleApiService
+//) : GooglePhotosRepository {
+//    /** Fetches list of MarsPhoto from marsApi*/
+//    override suspend fun getGoogleAlbums(): String = googleApiService.getAlbums()
+////    override suspend fun getGoogleAlbums(): List<GoogleAlbums> = googleApiService.getAlbums()
+//}

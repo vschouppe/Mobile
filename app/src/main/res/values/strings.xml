@@ -35,10 +35,18 @@
 <!--    <string name="art_ap_google_web_client_id">74689574541-oqhu4nanq5nukjafn51vk41lfpik9uau.apps.googleusercontent.com</string>-->
 <!--    <string name="google_web_client_id">74689574541-265l94nfid07vp6t116bt34it3gt1ean.apps.googleusercontent.com</string>-->
     <string name="firebase_web_client_id">74689574541-265l94nfid07vp6t116bt34it3gt1ean.apps.googleusercontent.com</string>
+    <string name="firebase_client_secret">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</string>
     <string name="google_web_client_id">74689574541-kq8209stu4goar54qaet5qu463733sur.apps.googleusercontent.com</string>
+    <string name="google_web_client_secret">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</string>
+    <string name="oauth_token">4/0AeaYSHD8-O2MIYYd8ArJLQOR1y8ytTGPxoGNP0Er-W3I-XYe6YeTkma-_b5oswfQz-sRGA</string>
+    <string name="client_id_notsure">407408718192.apps.googleusercontent.com</string>
 <!--    <string name="firebase_web_client_id">74689574541-2tbg24kjnoo0v3dejehcjg06cafj543e.apps.googleusercontent.com</string>-->
 
-    //Google sign in
+
+<!--    <string name="google_scope_photolib_readonly">https://www.googleapis.com/auth/photoslibrary.readonly</string>-->
+    <string name="google_scope_photolib_readonly">email profile</string>
+
+<!--    Google sign in-->
     <string name="google_sign_in">Log into Google</string>
     <string name="google_signed_in">You are logged into Google</string>
     <string name="google_signed_in_failed">Your google sign in failed</string>

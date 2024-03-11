@@ -16,7 +16,7 @@
 package com.vschouppe.artapp.data
 
 import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
-import com.vschouppe.artapp.network.GoogleApiService
+//import com.vschouppe.artapp.network.GoogleApiService
 import kotlinx.serialization.json.Json
 import okhttp3.MediaType.Companion.toMediaType
 import retrofit2.Retrofit
@@ -24,42 +24,42 @@ import retrofit2.Retrofit
 /**
  * Dependency Injection container at the application level.
  */
-interface AppContainer {
-    val googlePhotoRepository: GooglePhotosRepository
-}
+//interface AppContainer {
+//    val googlePhotoRepository: GooglePhotosRepository
+//}
 
 /**
  * Implementation for the Dependency Injection container at the application level.
  *
  * Variables are initialized lazily and the same instance is shared across the whole app.
  */
-class DefaultAppContainer : AppContainer {
-//    private val baseUrl = "https://android-kotlin-fun-mars-server.appspot.com/"
-//    private val baseUrl = "https://photoslibrary.googleapis.com/v1/albums/"
-    private val googleBaseUrl = "https://photoslibrary.googleapis.com/v1/"
-//    private val baseUrl = "https://photoslibrary.googleapis.com/v1/mediaItems"
-//    private val baseUrl = "https://photoslibrary.googleapis.com/v1/albums"
-
-    /**
-     * Use the Retrofit builder to build a retrofit object using a kotlinx.serialization converter
-     */
-    private val googleRetroFit: Retrofit = Retrofit.Builder()
-        .addConverterFactory(Json.asConverterFactory("application/json".toMediaType()))
-        .baseUrl(googleBaseUrl)
-        .build()
-
-    /**
-     * Retrofit service object for creating api calls
-     */
-    private val googleRetrofitService: GoogleApiService by lazy {
-        googleRetroFit.create(GoogleApiService::class.java)
-    }
-
-    /**
-     * DI implementation for google photos repository
-     */
-    override val googlePhotoRepository: GooglePhotosRepository by lazy {
-        NetworkGooglePhotosRepository(googleRetrofitService)
-    }
-
-}
+//class DefaultAppContainer : AppContainer {
+////    private val baseUrl = "https://android-kotlin-fun-mars-server.appspot.com/"
+////    private val baseUrl = "https://photoslibrary.googleapis.com/v1/albums/"
+//    private val googleBaseUrl = "https://photoslibrary.googleapis.com/v1/"
+////    private val baseUrl = "https://photoslibrary.googleapis.com/v1/mediaItems"
+////    private val baseUrl = "https://photoslibrary.googleapis.com/v1/albums"
+//
+//    /**
+//     * Use the Retrofit builder to build a retrofit object using a kotlinx.serialization converter
+//     */
+//    private val googleRetroFit: Retrofit = Retrofit.Builder()
+//        .addConverterFactory(Json.asConverterFactory("application/json".toMediaType()))
+//        .baseUrl(googleBaseUrl)
+//        .build()
+//
+//    /**
+//     * Retrofit service object for creating api calls
+//     */
+////    private val googleRetrofitService: GoogleApiService by lazy {
+////        googleRetroFit.create(GoogleApiService::class.java)
+////    }
+//
+//    /**
+//     * DI implementation for google photos repository
+//     */
+////    override val googlePhotoRepository: GooglePhotosRepository by lazy {
+////        NetworkGooglePhotosRepository(googleRetrofitService)
+////    }
+//
+//}
